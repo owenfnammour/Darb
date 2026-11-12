@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { Link, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/authContext.js'
 import { AuthError } from '../lib/authApi.js'
 import { validateRegister, hasErrors, EMAIL_DOMAIN, MIN_PASSWORD_LENGTH } from '../lib/validation.js'
+import { afterSignInPath } from '../lib/afterSignIn.js'
 import AuthLayout from '../components/auth/AuthLayout.jsx'
 import FormField from '../components/auth/FormField.jsx'
 import FormAlert from '../components/auth/FormAlert.jsx'
@@ -9,9 +11,9 @@ import Button from '../components/Button.jsx'
 
 const emptyForm = { name: '', email: '', password: '', password2: '' }
 
-// onRegistered: what to do after the account is made (later: navigate somewhere)
-export default function Register({ onRegistered = () => {} }) {
-  const { register } = useAuth()
+export default function Register() {
+  const { user, register } = useAuth()
+  const location = useLocation()
   const [values, setValues] = useState(emptyForm)
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState(null)
@@ -38,8 +40,8 @@ export default function Register({ onRegistered = () => {} }) {
     setFormError(null)
     setSubmitting(true)
     try {
-      const user = await register({ name: values.name, email: values.email, password: values.password })
-      onRegistered(user)
+      // On success the new user is signed in, and the check below sends them on
+      await register({ name: values.name, email: values.email, password: values.password })
     } catch (error) {
       if (error instanceof AuthError && error.code === 'email-taken') {
         // The user knows exactly what to fix, so the message sits on the field
@@ -52,6 +54,9 @@ export default function Register({ onRegistered = () => {} }) {
       setSubmitting(false)
     }
   }
+
+  // Signed in (just registered, or already): nothing to do here
+  if (user) return <Navigate to={afterSignInPath(location)} replace />
 
   return (
     <AuthLayout title="Make an account" subtitle="Your university address, so riders know who you are.">
@@ -98,21 +103,15 @@ export default function Register({ onRegistered = () => {} }) {
           error={errors.password2}
         />
 
-        <Button
-          type="submit"
-          disabled={submitting}
-          aria-busy={submitting}
-          className={`w-full ${submitting ? 'opacity-60' : ''}`}
-        >
+        <Button type="submit" disabled={submitting} aria-busy={submitting} className="w-full">
           {submitting ? 'Creating account…' : 'Create account'}
         </Button>
 
         <p className="text-center text-xs text-muted">
           Already have an account?{' '}
-          {/* TODO: becomes <Link to="/signin"> once we have the router */}
-          <a href="/signin" className="font-semibold text-brand-800 underline decoration-accent-400 decoration-2 underline-offset-4">
+          <Link to="/sign-in" state={location.state} className="font-semibold text-brand-800 underline decoration-accent-400 decoration-2 underline-offset-4">
             Sign in
-          </a>
+          </Link>
         </p>
       </form>
     </AuthLayout>

@@ -1,16 +1,24 @@
 // A pretend server for Phase 1. It keeps users in localStorage.
 // In Phase 2 only this file changes: the same functions will call the real API.
 import { normalizeEmail } from './validation.js'
+import { users } from '../data/rides.js'
 
-const USERS_KEY = 'darb.users'
-const SESSION_KEY = 'darb.session'
+// v2: the ids changed to match data/rides.js, so old saved test accounts are ignored
+const USERS_KEY = 'darb.users.v2'
+const SESSION_KEY = 'darb.session.v2'
 const FAKE_DELAY_MS = 400 // so loading states actually show up
 
 // Phase 1 only: passwords are kept in plain text because there is no server.
 // Phase 2 must hash them on the server and never send them back.
-const seedUsers = [
-  { id: 'u-hana', name: 'Hana Ali', email: 'hana.ali@lau.edu', password: 'password123' },
-]
+// Test accounts: every sample user in data/rides.js, with the same id,
+// so "who is signed in" matches "who is on the ride".
+// Email is firstname.lastname@lau.edu, password is password123.
+const seedUsers = Object.values(users).map((u) => ({
+  id: u.id,
+  name: u.name,
+  email: `${u.name.toLowerCase().replace(/\s+/g, '.')}@lau.edu`,
+  password: 'password123',
+}))
 
 export class AuthError extends Error {
   constructor(code, message) {
@@ -88,4 +96,17 @@ export async function getSession() {
   const id = localStorage.getItem(SESSION_KEY)
   const user = readUsers().find((u) => u.id === id)
   return user ? toPublicUser(user) : null
+}
+
+// Development only: the "Viewing as" switch uses this to become a sample user
+// without typing a password. null signs out.
+export async function signInAs(id) {
+  if (id === null) {
+    localStorage.removeItem(SESSION_KEY)
+    return null
+  }
+  const user = readUsers().find((u) => u.id === id)
+  if (!user) throw new AuthError('unknown-user', 'There is no test user with that id')
+  localStorage.setItem(SESSION_KEY, user.id)
+  return toPublicUser(user)
 }

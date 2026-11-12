@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { Link, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/authContext.js'
 import { AuthError } from '../lib/authApi.js'
 import { validateSignIn, hasErrors } from '../lib/validation.js'
+import { afterSignInPath } from '../lib/afterSignIn.js'
 import AuthLayout from '../components/auth/AuthLayout.jsx'
 import FormField from '../components/auth/FormField.jsx'
 import FormAlert from '../components/auth/FormAlert.jsx'
@@ -9,10 +11,9 @@ import Button from '../components/Button.jsx'
 
 const emptyForm = { email: '', password: '' }
 
-// onSignedIn: what to do after success (later: navigate somewhere).
-// Passed in from outside so this page doesn't depend on the router yet.
-export default function SignIn({ onSignedIn = () => {} }) {
-  const { signIn } = useAuth()
+export default function SignIn() {
+  const { user, signIn } = useAuth()
+  const location = useLocation()
   const [values, setValues] = useState(emptyForm)
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState(null)
@@ -41,8 +42,8 @@ export default function SignIn({ onSignedIn = () => {} }) {
     setFormError(null)
     setSubmitting(true)
     try {
-      const user = await signIn(values)
-      onSignedIn(user)
+      // On success the user is set, and the check below sends them on
+      await signIn(values)
     } catch (error) {
       if (error instanceof AuthError) {
         // Same message for a wrong email or a wrong password
@@ -55,6 +56,9 @@ export default function SignIn({ onSignedIn = () => {} }) {
       setSubmitting(false)
     }
   }
+
+  // Signed in (just now, or already): nothing to do here
+  if (user) return <Navigate to={afterSignInPath(location)} replace />
 
   return (
     <AuthLayout title="Welcome back" subtitle="Sign in to ask for a seat or post a ride.">
@@ -82,21 +86,16 @@ export default function SignIn({ onSignedIn = () => {} }) {
           error={errors.password}
         />
 
-        <Button
-          type="submit"
-          disabled={submitting}
-          aria-busy={submitting}
-          className={`w-full ${submitting ? 'opacity-60' : ''}`}
-        >
+        <Button type="submit" disabled={submitting} aria-busy={submitting} className="w-full">
           {submitting ? 'Signing in…' : 'Sign in'}
         </Button>
 
         <p className="text-center text-xs text-muted">
           New here?{' '}
-          {/* TODO: becomes <Link to="/register"> once we have the router */}
-          <a href="/register" className="font-semibold text-brand-800 underline decoration-accent-400 decoration-2 underline-offset-4">
+          {/* Pass the "from" page along, so registering also brings you back */}
+          <Link to="/register" state={location.state} className="font-semibold text-brand-800 underline decoration-accent-400 decoration-2 underline-offset-4">
             Make one
-          </a>
+          </Link>
         </p>
       </form>
     </AuthLayout>

@@ -1,5 +1,6 @@
-import { useMemo, useReducer, useState } from 'react'
+import { useMemo, useReducer } from 'react'
 import { RidesContext, ViewerContext } from './context.js'
+import { useAuth } from '../context/authContext.js'
 import { initialRides, users } from '../data/rides.js'
 import { acceptCheck, activeRequest, conflictingRide, queue, seatCount } from '../data/seats.js'
 
@@ -96,9 +97,22 @@ export function RidesProvider({ children }) {
   return <RidesContext.Provider value={value}>{children}</RidesContext.Provider>
 }
 
-// Stand-in for sign-in until the auth surface exists
+// The viewer is whoever is signed in (see context/AuthProvider.jsx).
+// Sample users also carry profile details (major, rides driven...), so those are added when they exist.
+// useViewer() stays the same for every page.
 export function ViewerProvider({ children }) {
-  const [viewerId, setViewerId] = useState('hana')
-  const value = useMemo(() => ({ viewer: users[viewerId] ?? null, setViewerId }), [viewerId])
+  const { user, status, signInAs } = useAuth()
+  const value = useMemo(
+    () => ({
+      viewer: user ? { ...user, ...users[user.id] } : null,
+      // The dev "Viewing as" switch signs in as that person for real
+      setViewerId: (id) => signInAs?.(id),
+    }),
+    [user, signInAs],
+  )
+
+  // Wait until we know who is signed in, so no page flashes its signed-out version on refresh
+  if (status === 'loading') return null
+
   return <ViewerContext.Provider value={value}>{children}</ViewerContext.Provider>
 }

@@ -1,11 +1,12 @@
+import PageShell from '../PageShell.jsx'
 import RoadLine from '../RoadLine.jsx'
 
 // The design says Register is the "same frame" as Sign in,
-// so both pages render inside this.
+// so both pages render inside this, with the normal header and footer around it.
 export default function AuthLayout({ title, subtitle, children }) {
   return (
-    <main className="mx-auto max-w-5xl px-4 py-10">
-      <div className="grid items-start gap-10 lg:grid-cols-[1fr_auto]">
+    <PageShell>
+      <div className="mx-auto grid max-w-5xl items-start gap-10 lg:grid-cols-[1fr_auto]">
         <div className="max-w-md lg:pt-6">
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent-600">Seats going your way</p>
           <h1 className="mt-4 font-display text-4xl font-bold leading-[1.05] tracking-tight text-brand-900">
@@ -27,6 +28,6 @@ export default function AuthLayout({ title, subtitle, children }) {
           </div>
         </div>
       </div>
-    </main>
+    </PageShell>
   )
 }

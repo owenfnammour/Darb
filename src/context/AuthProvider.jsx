@@ -43,6 +43,13 @@ export function AuthProvider({ children }) {
     setStatus('signed-out')
   }
 
-  const value = { user, status, signIn, register, signOut }
+  // Dev only, for the "Viewing as" switch. Not available in a real build.
+  async function signInAs(id) {
+    const switchedUser = await authApi.signInAs(id)
+    setUser(switchedUser)
+    setStatus(switchedUser ? 'signed-in' : 'signed-out')
+  }
+
+  const value = { user, status, signIn, register, signOut, signInAs: import.meta.env.DEV ? signInAs : undefined }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
