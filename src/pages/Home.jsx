@@ -2,7 +2,7 @@ import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import Button from '../components/Button.jsx'
 import RideCard from '../components/RideCard.jsx'
-import { rides, viewer } from '../data/rides.js'
+import { useRides, useViewer } from '../state/context.js'
 
 const fields = [
   { id: 'h-from', label: 'Leaving from', placeholder: 'Jbeil' },
@@ -17,6 +17,13 @@ const steps = [
 ]
 
 export default function Home() {
+  const { rides } = useRides()
+  const { viewer } = useViewer()
+  const leavingSoon = [...rides]
+    .filter((ride) => !ride.cancelled)
+    .sort((a, b) => new Date(a.departsAt) - new Date(b.departsAt))
+    .slice(0, 2)
+
   return (
     <>
       <Header active="Find a ride" initials={viewer ? viewer.initials : ''} />
@@ -72,7 +79,7 @@ export default function Home() {
             </a>
           </div>
           <ul className="mt-5 grid gap-4 lg:grid-cols-2">
-            {rides.map((ride) => (
+            {leavingSoon.map((ride) => (
               <RideCard key={ride.id} ride={ride} viewer={viewer} />
             ))}
           </ul>

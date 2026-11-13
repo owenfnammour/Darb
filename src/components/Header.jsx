@@ -1,6 +1,12 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
-const links = ['Find a ride', 'Post a ride', 'My rides']
+// Pages nobody has built yet land on the "nothing here yet" page
+const links = [
+  { label: 'Find a ride', to: '/' },
+  { label: 'Post a ride', to: '/post' },
+  { label: 'My rides', to: '/my-rides' },
+]
 
 // active: which nav link is the current page
 // initials: the signed-in user's initials (OW for Owen Nammour), empty when signed out
@@ -8,16 +14,16 @@ export default function Header({ active, initials }) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   function linkClass(link) {
-    if (link === active) {
+    if (link.label === active) {
       return 'rounded-card px-3 py-2 text-sm bg-brand-50 font-semibold text-brand-900'
     }
     return 'rounded-card px-3 py-2 text-sm text-muted hover:bg-brand-50 hover:text-brand-900'
   }
 
   const navLinks = links.map((link) => (
-    <a key={link} href="#" className={linkClass(link)} aria-current={link === active ? 'page' : undefined}>
-      {link}
-    </a>
+    <Link key={link.label} to={link.to} className={linkClass(link)} aria-current={link.label === active ? 'page' : undefined}>
+      {link.label}
+    </Link>
   ))
 
   return (
@@ -34,10 +40,10 @@ export default function Header({ active, initials }) {
           </svg>
         </button>
 
-        <a href="#" className="flex items-baseline gap-2">
+        <Link to="/" className="flex items-baseline gap-2">
           <span className="font-display text-xl font-bold tracking-tight text-brand-900">Darb</span>
           <span className="hidden text-[11px] uppercase tracking-[0.18em] text-accent-600 sm:inline">Seats going your way</span>
-        </a>
+        </Link>
 
         <nav className="ml-4 hidden gap-1 md:flex">{navLinks}</nav>
 
@@ -48,9 +54,9 @@ export default function Header({ active, initials }) {
             {initials}
           </span>
         ) : (
-          <a href="#" className="rounded-card px-3 py-2 text-sm font-semibold text-brand-900 hover:bg-brand-50">
+          <Link to="/sign-in" className="rounded-card px-3 py-2 text-sm font-semibold text-brand-900 hover:bg-brand-50">
             Sign in
-          </a>
+          </Link>
         )}
       </div>
 
