@@ -2,12 +2,14 @@ import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import Button from '../components/Button.jsx'
 import RideCard from '../components/RideCard.jsx'
+import { Link, useNavigate } from 'react-router-dom'
 import { useRides, useViewer } from '../state/context.js'
 
+// name is what the field is called in the address when the form is sent, e.g. /browse?from=Jbeil
 const fields = [
-  { id: 'h-from', label: 'Leaving from', placeholder: 'Jbeil' },
-  { id: 'h-to', label: 'Going to', placeholder: 'Byblos campus' },
-  { id: 'h-when', label: 'When', type: 'date' },
+  { id: 'h-from', name: 'from', label: 'Leaving from', placeholder: 'Jbeil' },
+  { id: 'h-to', name: 'to', label: 'Going to', placeholder: 'Byblos campus' },
+  { id: 'h-when', name: 'day', label: 'When', type: 'date' },
 ]
 
 const steps = [
@@ -19,6 +21,7 @@ const steps = [
 export default function Home() {
   const { rides } = useRides()
   const { viewer } = useViewer()
+  const navigate = useNavigate()
   const leavingSoon = [...rides]
     .filter((ride) => !ride.cancelled)
     .sort((a, b) => new Date(a.departsAt) - new Date(b.departsAt))
@@ -43,20 +46,28 @@ export default function Home() {
             the driver decides who rides, and whatever it costs is settled between you.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button variant="accent">Find a seat</Button>
-            <Button variant="onDark">Post a ride</Button>
+            <Button variant="accent" onClick={() => navigate('/browse')}>Find a seat</Button>
+            <Button variant="onDark" onClick={() => navigate('/post')}>Post a ride</Button>
           </div>
         </section>
 
         {/* Route search section overlapping on the hero section*/}
         <div className="relative z-10 -mt-8 px-2 sm:px-6">
-          <form className="rounded-card border border-line bg-surface p-4 shadow-sm sm:p-5" onSubmit={(e) => e.preventDefault()}>
+          {/* Sends what was typed to the browse page in the address: /browse?from=...&to=...&day=... */}
+          <form
+            className="rounded-card border border-line bg-surface p-4 shadow-sm sm:p-5"
+            onSubmit={(e) => {
+              e.preventDefault()
+              navigate('/browse?' + new URLSearchParams(new FormData(e.target)))
+            }}
+          >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {fields.map(({ id, label, type, placeholder }) => (
+              {fields.map(({ id, name, label, type, placeholder }) => (
                 <div key={id} className="flex flex-col gap-1.5">
                   <label htmlFor={id} className="text-xs font-semibold uppercase tracking-wide text-muted">{label}</label>
                   <input
                     id={id}
+                    name={name}
                     type={type}
                     placeholder={placeholder}
                     className="w-full rounded-card border border-line bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-muted/60 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-100"
@@ -74,9 +85,9 @@ export default function Home() {
         <section className="mt-14">
           <div className="flex items-end justify-between gap-4">
             <h2 className="font-display text-2xl font-semibold tracking-tight text-brand-900">Leaving soon</h2>
-            <a href="#" className="text-sm font-medium text-brand-700 underline decoration-accent-400 decoration-2 underline-offset-4">
+            <Link to="/browse" className="text-sm font-medium text-brand-700 underline decoration-accent-400 decoration-2 underline-offset-4">
               All rides
-            </a>
+            </Link>
           </div>
           <ul className="mt-5 grid gap-4 lg:grid-cols-2">
             {leavingSoon.map((ride) => (

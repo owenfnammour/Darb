@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { RidesProvider, ViewerProvider } from './state/Providers.jsx'
 import Home from './pages/Home.jsx'
+import Browse from './pages/Browse.jsx'
 import RidePage from './pages/RidePage.jsx'
 import DriverPage from './pages/DriverPage.jsx'
 import NotFound from './pages/NotFound.jsx'
@@ -12,6 +13,7 @@ export default function App() {
         <RidesProvider>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/browse" element={<Browse />} />
             <Route path="/ride/:id" element={<RidePage />} />
             <Route path="/driver/:id" element={<DriverPage />} />
             <Route path="*" element={<NotFound />} />
