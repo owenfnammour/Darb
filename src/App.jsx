@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate, Route, Routes } from 'react-router-dom'
 import { RidesProvider, ViewerProvider } from './state/Providers.jsx'
 import { AuthProvider } from './context/AuthProvider.jsx'
 import Home from './pages/Home.jsx'
@@ -8,10 +8,12 @@ import NotFound from './pages/NotFound.jsx'
 import SignIn from './pages/SignIn.jsx'
 import Register from './pages/Register.jsx'
 import MyRidesRiding from './pages/MyRidesRiding.jsx'
+import MyRidesDriving from './pages/MyRidesDriving.jsx'
+import PostRidePage from './pages/PostRidePage.jsx'
 
-export default function App() {
+function AppRoutes() {
   return (
-    <BrowserRouter>
+    <>
       <AuthProvider>
         <ViewerProvider>
           <RidesProvider>
@@ -21,7 +23,9 @@ export default function App() {
               <Route path="/driver/:id" element={<DriverPage />} />
               <Route path="/sign-in" element={<SignIn />} />
               <Route path="/register" element={<Register />} />
-              {/* Until the Driving tab exists, "My rides" opens Riding */}
+              <Route path="/post" element={<PostRidePage />} />
+              <Route path="/ride/:id/edit" element={<PostRidePage />} />
+              <Route path="/my-rides/driving" element={<MyRidesDriving />} />
               <Route path="/my-rides" element={<Navigate to="/my-rides/riding" replace />} />
               <Route path="/my-rides/riding" element={<MyRidesRiding />} />
               <Route path="*" element={<NotFound />} />
@@ -29,6 +33,11 @@ export default function App() {
           </RidesProvider>
         </ViewerProvider>
       </AuthProvider>
-    </BrowserRouter>
+    </>
   )
 }
+
+// A single data-router context enables the Post form's required navigation blocker.
+// Existing route elements and provider ordering are retained.
+const router = createBrowserRouter([{ path: '*', element: <AppRoutes /> }])
+export default function App() { return <RouterProvider router={router} /> }

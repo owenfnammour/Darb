@@ -1,5 +1,6 @@
-import { useMemo, useReducer } from 'react'
-import { RidesContext, ViewerContext } from './context.js'
+import { useCallback, useMemo, useReducer } from 'react'
+import { RidesContext, ViewerContext, useViewer } from './context.js'
+import { prepareDriverRide } from '../features/driving/rideForm.js'
 import { useAuth } from '../context/authContext.js'
 import { initialRides, users } from '../data/rides.js'
 import { acceptCheck, activeRequest, conflictingRide, queue, seatCount } from '../data/seats.js'
@@ -28,6 +29,12 @@ function offerFreedSeats(ride) {
 
 // The house rules live here for Phase 1; in Phase 2 the API enforces them.
 function reducer(state, action) {
+  if (action.type === 'driver/save') {
+    const existing = state.find((ride) => ride.id === action.ride.id)
+    return existing
+      ? mapRide(state, existing.id, (ride) => ({ ...action.ride, requests: ride.requests }))
+      : [...state, action.ride]
+  }
   const ride = state.find((r) => r.id === action.rideId)
   if (!ride) return state
 
@@ -90,9 +97,15 @@ function reducer(state, action) {
 
 export function RidesProvider({ children }) {
   const [rides, dispatch] = useReducer(reducer, initialRides)
+  const { viewer } = useViewer()
+  const saveRide = useCallback((values, rideId) => {
+    const ride = prepareDriverRide(rides, values, viewer, rideId, crypto.randomUUID())
+    dispatch({ type: 'driver/save', ride })
+    return ride
+  }, [rides, viewer])
   const value = useMemo(
-    () => ({ rides: rides.map((r) => ({ ...r, driver: users[r.driverId] })), dispatch }),
-    [rides],
+    () => ({ rides: rides.map((r) => ({ ...r, driver: users[r.driverId] ?? r.driver })), dispatch, saveRide }),
+    [rides, saveRide],
   )
   return <RidesContext.Provider value={value}>{children}</RidesContext.Provider>
 }
