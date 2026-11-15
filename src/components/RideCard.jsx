@@ -8,6 +8,7 @@ import { dayLabel, timeLabel } from '../data/rides.js'
 
 export default function RideCard({ ride, viewer }) {
   const full = seatCount(ride, viewer).left === 0
+  const own = viewer?.id === ride.driverId
   const navigate = useNavigate()
 
   return (
@@ -35,7 +36,7 @@ export default function RideCard({ ride, viewer }) {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <SeatCounter ride={ride} viewer={viewer} />
-        {full ? null : <Button size="sm" className="relative" onClick={() => navigate(`/ride/${ride.id}`)}>Request a seat</Button>}
+        {full || own ? null : <Button size="sm" className="relative" onClick={() => navigate(`/ride/${ride.id}`)}>Request a seat</Button>}
       </div>
     </li>
   )

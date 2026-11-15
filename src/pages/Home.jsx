@@ -1,5 +1,4 @@
-import Header from '../components/Header.jsx'
-import Footer from '../components/Footer.jsx'
+import PageShell from '../components/PageShell.jsx'
 import Button from '../components/Button.jsx'
 import RideCard from '../components/RideCard.jsx'
 import { Link, useNavigate } from 'react-router-dom'
@@ -28,10 +27,7 @@ export default function Home() {
     .slice(0, 2)
 
   return (
-    <>
-      <Header active="Find a ride" initials={viewer ? viewer.initials : ''} />
-
-      <main className="mx-auto max-w-6xl px-4 py-10">
+    <PageShell active="Find a ride">
         {/* Hero section*/}
         <section className="relative overflow-hidden rounded-card border border-line bg-brand-900 px-6 py-12 text-paper sm:px-10 sm:py-16">
           <div className="absolute inset-x-0 bottom-0 h-px bg-accent-400/50" aria-hidden="true"></div>
@@ -106,9 +102,6 @@ export default function Home() {
             </div>
           ))}
         </section>
-      </main>
-
-      <Footer />
-    </>
+    </PageShell>
   )
 }

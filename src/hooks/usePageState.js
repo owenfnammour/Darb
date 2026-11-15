@@ -19,7 +19,9 @@ export default function usePageState(delay = 450) {
   if (forced === 'error') status = 'error'
 
   function retry() {
-    setParams({}, { replace: true })
+    const next = new URLSearchParams(params)
+    next.delete('state')
+    setParams(next, { replace: true })
     setAttempt((a) => a + 1)
   }
 

@@ -5,6 +5,7 @@ import Breadcrumb from '../components/Breadcrumb.jsx'
 import Button from '../components/Button.jsx'
 import RideCard from '../components/RideCard.jsx'
 import RideCardSkeleton from '../components/RideCardSkeleton.jsx'
+import { ErrorState } from '../components/PageStates.jsx'
 import usePageState from '../hooks/usePageState.js'
 import { useRides, useViewer } from '../state/context.js'
 import { seatCount } from '../data/seats.js'
@@ -31,23 +32,30 @@ function routeOf(ride) {
 
 export default function Browse() {
   const navigate = useNavigate()
-  const [params] = useSearchParams()
+  const [params, setParams] = useSearchParams()
   const { rides } = useRides()
   const { viewer } = useViewer()
   // 'loading', 'error' or 'ready'. Add ?state=loading or ?state=error to the address to see them.
   const { status, retry } = usePageState()
 
-  // The filters start from what was searched on the home page, if anything.
-  // The arrow stays in, so "Jbeil →" only finds rides leaving Jbeil, not rides going there.
   const from = params.get('from') ?? ''
   const to = params.get('to') ?? ''
   const noFilters = { route: '', day: '', seats: 'Any', price: 'Any' }
-  const [filters, setFilters] = useState({
-    ...noFilters,
-    route: from || to ? `${from} → ${to}`.trim() : '',
+  const filters = {
+    route: params.get('route') ?? (from || to ? `${from} → ${to}`.trim() : ''),
     day: params.get('day') ?? '',
-  })
+    seats: params.get('seats') ?? 'Any',
+    price: params.get('price') ?? 'Any',
+  }
   const [page, setPage] = useState(1)
+
+  function setFilters(next) {
+    const query = new URLSearchParams()
+    for (const name in next) {
+      if (next[name] !== noFilters[name]) query.set(name, next[name])
+    }
+    setParams(query, { replace: true })
+  }
 
   // One handler for every field: the field's name says which filter it changes
   function change(e) {
@@ -88,6 +96,8 @@ export default function Browse() {
 
   // Empty state: find the filter that matches nothing even on its own, and offer to undo just that one
   const tooNarrow = allRides.length > 0 && Object.keys(tests).find((name) => !allRides.some(tests[name]))
+  const sameSearch = allRides.filter((ride) => tests.route(ride) && tests.seats(ride) && tests.price(ride))
+  const otherDay = filters.day && (sameSearch.find((ride) => dayOf(ride) > filters.day) ?? sameSearch[0])
   const emptyMessages = {
     route: { title: 'Nobody is driving ' + filters.route, text: 'Check the spelling, or post the ride yourself and let people come to you.', fix: 'See all routes' },
     day: { title: 'Nobody is driving on ' + (filters.day && dayName(filters.day)), text: 'There are rides on other days. Try another day, or post the ride yourself.', fix: 'See all days' },
@@ -99,10 +109,20 @@ export default function Browse() {
     empty = { title: 'Nobody has posted a ride yet', text: 'Be the first, and let people come to you.', fix: 'Clear all' }
   } else if (tooNarrow) {
     empty = emptyMessages[tooNarrow]
+  } else if (otherDay) {
+    const weekday = dayName(dayOf(otherDay)).split(' ')[0]
+    empty = {
+      title: 'Nobody is driving ' + (filters.route || 'this route') + ' on ' + dayName(filters.day),
+      text: 'There are rides on other days. Try ' + weekday + ', or post the ride yourself and let people come to you.',
+      fix: 'See ' + weekday,
+    }
   }
 
   function fixSearch() {
-    if (tooNarrow) {
+    if (!tooNarrow && otherDay) {
+      setFilters({ ...filters, day: dayOf(otherDay) })
+      setPage(1)
+    } else if (tooNarrow) {
       setFilters({ ...filters, [tooNarrow]: noFilters[tooNarrow] })
       setPage(1)
     } else {
@@ -168,16 +188,8 @@ export default function Browse() {
           </ul>
         )}
 
-        {/* State: error. Plain language, no status code, and always a retry. */}
         {status === 'error' && (
-          <div role="alert" className="rounded-card border border-red-200 bg-red-50 px-6 py-12 text-center">
-            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 font-display text-xl font-bold text-red-800" aria-hidden="true">!</span>
-            <h2 className="mt-4 font-display text-xl font-semibold text-red-900">We could not load the rides</h2>
-            <p className="mx-auto mt-2 max-w-sm text-sm text-red-800/80">The server did not answer. This is usually over in a moment.</p>
-            <div className="mt-6">
-              <Button size="sm" onClick={retry}>Try again</Button>
-            </div>
-          </div>
+          <ErrorState title="We could not load the rides" text="The server did not answer. This is usually over in a moment." onRetry={retry} />
         )}
 
         {/* State: empty. Says which filter is too narrow and offers the two real ways out. */}
