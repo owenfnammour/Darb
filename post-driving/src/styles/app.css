@@ -1,0 +1,17 @@
+@import './fonts.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body { @apply bg-paper font-body text-ink antialiased; }
+  button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+  button:disabled { @apply cursor-not-allowed opacity-50; }
+  input, select, textarea { min-width: 0; }
+  ::selection { @apply bg-accent-200 text-brand-900; }
+}
+
+dialog::backdrop { background: rgb(15 28 46 / .5); backdrop-filter: blur(2px); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
