@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { useViewer } from '../state/context.js'
+import { useAuth } from '../context/authContext.js'
 
 // Pages nobody has built yet land on the "nothing here yet" page
 const links = [
@@ -9,9 +11,14 @@ const links = [
 ]
 
 // active: which nav link is the current page
-// initials: the signed-in user's initials (OW for Owen Nammour), empty when signed out
-export default function Header({ active, initials }) {
+// The header finds out who is signed in by itself, so it is right on every page
+// (an old initials prop from a page is simply ignored).
+export default function Header({ active }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
+  const { viewer } = useViewer()
+  const { signOut } = useAuth()
+  const initials = viewer ? viewer.initials : ''
 
   function linkClass(link) {
     if (link.label === active) {
@@ -50,11 +57,17 @@ export default function Header({ active, initials }) {
         <span className="flex-1"></span>
 
         {initials ? (
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-900 font-display text-xs font-bold text-paper">
-            {initials}
+          <span className="flex items-center gap-1">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-900 font-display text-xs font-bold text-paper">
+              {initials}
+            </span>
+            <button type="button" onClick={signOut} className="rounded-card px-3 py-2 text-sm text-muted hover:bg-brand-50 hover:text-brand-900">
+              Sign out
+            </button>
           </span>
         ) : (
-          <Link to="/sign-in" className="rounded-card px-3 py-2 text-sm font-semibold text-brand-900 hover:bg-brand-50">
+          // state.from: after signing in, come back to this page
+          <Link to="/sign-in" state={{ from: location.pathname }} className="rounded-card px-3 py-2 text-sm font-semibold text-brand-900 hover:bg-brand-50">
             Sign in
           </Link>
         )}
