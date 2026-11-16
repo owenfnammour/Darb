@@ -5,7 +5,7 @@ import { useAuth } from '../context/authContext.js'
 
 // Pages nobody has built yet land on the "nothing here yet" page
 const links = [
-  { label: 'Find a ride', to: '/' },
+  { label: 'Find a ride', to: '/browse' },
   { label: 'Post a ride', to: '/post' },
   { label: 'My rides', to: '/my-rides' },
 ]
