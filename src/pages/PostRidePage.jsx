@@ -1,10 +1,11 @@
+import { isDriverReviewClosed } from '../lib/rideForm.js'
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import PageShell from '../components/PageShell.jsx'
 import Breadcrumb from '../components/Breadcrumb.jsx'
 import { ErrorState, Skeleton } from '../components/PageStates.jsx'
 import usePageState from '../hooks/usePageState.js'
 import { useRides, useViewer } from '../state/context.js'
-import { RideForm } from '../features/driving/RideForm.jsx'
+import { RideForm } from '../components/RideForm.jsx'
 
 export default function PostRidePage() {
   const { id } = useParams()
@@ -28,7 +29,7 @@ export default function PostRidePage() {
   </div>
   else if (status === 'loading') content = <div role="status" aria-label="Loading ride form" className="mt-6 space-y-4"><Skeleton className="h-36" /><Skeleton className="h-36" /></div>
   else if (status === 'error') content = <ErrorState title="We could not load this ride" text="Please try again." onRetry={retryForm} />
-  else if (rideId && (!ride || ride.driverId !== viewer.id || ride.cancelled)) content = <div className="mt-6">
+  else if (rideId && (!ride || ride.driverId !== viewer.id || isDriverReviewClosed(ride))) content = <div className="mt-6">
     <h2 className="font-display text-xl font-semibold text-brand-900">This ride is unavailable</h2>
     <p className="mt-2 text-sm text-muted">You can edit your own active rides.</p>
     <Link to="/my-rides/driving" className="mt-4 inline-block font-semibold text-brand-800 underline">Back to my rides</Link>

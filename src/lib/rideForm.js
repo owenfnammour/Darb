@@ -1,10 +1,11 @@
-import { conflictingRide } from '../../data/seats.js'
+import { NOW } from '../data/rides.js'
+import { conflictingRide } from '../data/seats.js'
 
 export const CAMPUSES = ['Byblos campus', 'Beirut campus'];
 export const CAMPUS_TIME_ZONE = 'Asia/Beirut';
 
 /** Forms and display use campus local time; stored departure times are ISO instants. */
-export function campusDateTime(instant = new Date()) {
+export function campusDateTime(instant = NOW) {
   const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
     timeZone: CAMPUS_TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
@@ -26,7 +27,7 @@ export function departureInstant(date, time) {
   return resolved.date === date && resolved.time === time ? guess : NaN;
 }
 
-export function validateRide(values, capacity, acceptedSeats = 0, now = Date.now(), existingDestination) {
+export function validateRide(values, capacity, acceptedSeats = 0, now = NOW, existingDestination) {
   const errors = {};
   const seats = Number(values.offeredSeats);
   const price = Number(values.price);
@@ -73,11 +74,12 @@ export function passengerCapacity(viewer) {
   return { karim: 5, hana: 5, fatme: 4 }[viewer?.id] ?? 4
 }
 
-export function prepareDriverRide(rides, values, viewer, rideId, newId, now = Date.now()) {
+export function prepareDriverRide(rides, values, viewer, rideId, newId, now = NOW) {
   if (!viewer) throw new Error('Sign in to post a ride.')
   const previous = rideId == null ? null : rides.find((ride) => String(ride.id) === String(rideId))
   if (rideId != null && !previous) throw new Error('This ride could not be found.')
   if (previous && (previous.driverId !== viewer.id || previous.cancelled)) throw new Error('You can edit your own active rides.')
+  if (previous && hasDeparted(previous.departsAt, now)) throw new Error('This ride has departed and can no longer be edited.')
   const accepted = previous?.requests.filter((request) => request.status === 'accepted').reduce((sum, request) => sum + request.seats, 0) ?? 0
   const errors = validateRide(values, passengerCapacity(viewer), accepted, now, previous?.to)
   if (Object.keys(errors).length) throw new Error(Object.values(errors)[0])
@@ -93,6 +95,10 @@ export function prepareDriverRide(rides, values, viewer, rideId, newId, now = Da
   }
 }
 
-export function isDriverReviewClosed(ride, now = Date.now()) {
-  return ride.cancelled || Date.parse(ride.departsAt) <= now
+export function isDriverReviewClosed(ride, now = NOW) {
+  return ride.cancelled || hasDeparted(ride.departsAt, now)
+}
+
+export function hasDeparted(departsAt, now = NOW) {
+  return Date.parse(departsAt) <= now
 }

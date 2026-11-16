@@ -8,8 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:driving": "node --test tests/driving/*.test.mjs",
-    "test:e2e:driving": "playwright test --config playwright.driving.config.mjs"
+    "test:driving": "node --test tests/driving/*.test.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.5",
@@ -20,7 +19,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "1.65.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",

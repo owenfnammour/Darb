@@ -7,8 +7,8 @@ import usePageState from '../hooks/usePageState.js'
 import { useRides, useViewer } from '../state/context.js'
 import { drivingCount, ridingList } from '../lib/riding.js'
 import { NOW } from '../data/rides.js'
-import DrivingRideRow from '../features/driving/DrivingRideRow.jsx'
-import DriverRequests from '../features/driving/DriverRequests.jsx'
+import DrivingRideRow from '../components/DrivingRideRow.jsx'
+import DriverRequests from '../components/DriverRequests.jsx'
 
 export default function MyRidesDriving() {
   const { rides } = useRides()

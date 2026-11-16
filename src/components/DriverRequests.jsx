@@ -1,22 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import Avatar from '../../components/Avatar.jsx'
-import Button from '../../components/Button.jsx'
-import SeatCounter from '../../components/SeatCounter.jsx'
-import StatusPill from '../../components/StatusPill.jsx'
-import { useRides } from '../../state/context.js'
-import { users } from '../../data/rides.js'
-import { acceptCheck } from '../../data/seats.js'
+import Avatar from './Avatar.jsx'
+import Button from './Button.jsx'
+import SeatCounter from './SeatCounter.jsx'
+import StatusPill from './StatusPill.jsx'
+import { useRides } from '../state/context.js'
+import { users } from '../data/rides.js'
+import { acceptCheck } from '../data/seats.js'
 import { ConfirmDialog } from './ConfirmDialog.jsx'
-import useHasDeparted from './useHasDeparted.js'
-import { isDriverReviewClosed } from './rideForm.js'
+import { hasDeparted, isDriverReviewClosed } from '../lib/rideForm.js'
 
 // Review from Driving, using the existing provider's request/queue transitions.
-// The teammate-owned Ride Detail and its RequestList are not modified.
 export default function DriverRequests({ ride, viewer, onClose }) {
   const { rides, dispatch } = useRides()
   const [confirming, setConfirming] = useState(null)
-  const departed = useHasDeparted(ride.departsAt)
+  const departed = hasDeparted(ride.departsAt)
   const heading = useRef(null)
   useEffect(() => { heading.current?.focus(); heading.current?.scrollIntoView({ block: 'start' }) }, [ride.id])
   if (ride.driverId !== viewer.id) return null
@@ -27,6 +25,7 @@ export default function DriverRequests({ ride, viewer, onClose }) {
     setConfirming(null)
   }
   function confirm() {
+    if (!confirming || isDriverReviewClosed(ride)) { setConfirming(null); return }
     if (confirming.type === 'cancelRide') {
       dispatch({ type: 'cancelRide', rideId: ride.id })
       onClose()
@@ -59,11 +58,11 @@ export default function DriverRequests({ ride, viewer, onClose }) {
             </div>
           </li>
         })}</ul>}
-    <div className="mt-5 flex flex-wrap gap-3 border-t border-line pt-4">
+    {!isDriverReviewClosed(ride) && <div className="mt-5 flex flex-wrap gap-3 border-t border-line pt-4">
       <Link to={`/post?edit=${ride.id}`} className="rounded-card border border-line px-3 py-2 text-xs font-medium text-brand-900 hover:bg-brand-50">Edit ride</Link>
       <Button type="button" size="sm" variant="danger" onClick={() => setConfirming({ type: 'cancelRide' })}>Cancel ride</Button>
-    </div>
-    <ConfirmDialog open={Boolean(confirming) && (confirming.type === 'cancelRide' || !departed)}
+    </div>}
+    <ConfirmDialog open={Boolean(confirming) && !isDriverReviewClosed(ride)}
       title={confirming?.type === 'cancelRide' ? 'Cancel this ride?' : 'Decline this request?'}
       confirmLabel={confirming?.type === 'cancelRide' ? 'Cancel ride' : 'Decline request'}
       cancelLabel={confirming?.type === 'cancelRide' ? 'Keep ride' : 'Keep request'}

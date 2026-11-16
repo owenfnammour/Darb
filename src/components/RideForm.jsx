@@ -1,12 +1,12 @@
 import { useRef, useState } from 'react';
 import { useBlocker, useBeforeUnload, useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
-import { CAMPUSES, campusDateTime, emptyRideForm, passengerCapacity, rideToForm, validateRide } from './rideForm.js';
-import { seatCount } from '../../data/seats.js';
-import { useRides, useViewer } from '../../state/context.js';
+import { CAMPUSES, campusDateTime, emptyRideForm, passengerCapacity, rideToForm, validateRide } from '../lib/rideForm.js';
+import { seatCount } from '../data/seats.js';
+import { useRides, useViewer } from '../state/context.js';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
-import Button from '../../components/Button.jsx';
-import './driving.css';
+import Button from './Button.jsx';
+
 
 function Field({ name, label, hint, error, children }) {
   return <div className="flex min-w-0 flex-col gap-1.5">

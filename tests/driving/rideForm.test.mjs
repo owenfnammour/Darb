@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { initialRides, users } from '../../src/data/rides.js'
 import { conflictingRide, seatCount } from '../../src/data/seats.js'
-import { campusDateTime, departureInstant, emptyRideForm, isDriverReviewClosed, passengerCapacity, prepareDriverRide, rideToForm, validateRide } from '../../src/features/driving/rideForm.js'
+import { campusDateTime, departureInstant, emptyRideForm, isDriverReviewClosed, passengerCapacity, prepareDriverRide, rideToForm, validateRide } from '../../src/lib/rideForm.js'
 
 const now = Date.parse('2026-11-01T10:00:00Z')
 const rides = () => structuredClone(initialRides)

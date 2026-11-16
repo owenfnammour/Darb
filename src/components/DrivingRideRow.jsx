@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom'
-import Button from '../../components/Button.jsx'
-import SeatCounter from '../../components/SeatCounter.jsx'
-import StatusPill from '../../components/StatusPill.jsx'
-import { shortDate, timeLabel } from '../../data/rides.js'
-import useHasDeparted from './useHasDeparted.js'
+import Button from './Button.jsx'
+import SeatCounter from './SeatCounter.jsx'
+import StatusPill from './StatusPill.jsx'
+import { shortDate, timeLabel } from '../data/rides.js'
+import { hasDeparted } from '../lib/rideForm.js'
 
 export default function DrivingRideRow({ ride, viewer, onReview }) {
-  const departed = useHasDeparted(ride.departsAt)
+  const departed = hasDeparted(ride.departsAt)
   const pending = ride.requests.filter((request) => request.status === 'pending').length
   return <li className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-card border border-line bg-surface px-5 py-4">
     <div className="min-w-0 flex-1">
