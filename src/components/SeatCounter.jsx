@@ -30,7 +30,8 @@ export function SeatRow({ ride, viewer }) {
 
 // ride: {seatsOffered, requests: [{riderId, seats, status}]}
 export default function SeatCounter({ ride, viewer }) {
-  const { taken, pending, left } = seatCount(ride, viewer)
+  const { taken, left } = seatCount(ride, viewer)
+  const pending = ride.requests.filter((request) => request.status === 'pending').length
 
   return (
     <span className="flex flex-wrap items-center gap-x-3 gap-y-2">
