@@ -1,3 +1,4 @@
+import { hasDeparted } from '../lib/rideForm.js'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Button from './Button.jsx'
@@ -35,6 +36,9 @@ export default function RideActions({ ride, viewer }) {
   }
 
   // 1. The driver
+  if (isOwner && hasDeparted(ride.departsAt)) {
+    return <div className={bar} role="status"><span className="text-sm text-ink">This ride has departed. It can no longer be edited or cancelled.</span></div>
+  }
   if (isOwner) {
     return (
       <div className={bar}>

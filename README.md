@@ -62,6 +62,13 @@ Then open the address Vite prints, usually http://localhost:5173.
 | `npm run build` | Builds the production version into `dist/` |
 | `npm run preview` | Serves the production build locally |
 | `npm run lint` | Checks the code with ESLint |
+| `npm run test:driving` | Runs the Post and Driving tests with Node's built-in test runner (no browser download) |
+
+## Post a ride and Driving
+
+Post trips at `/post`, edit at `/post?edit=ID` or `/ride/:id/edit`, and review requests at `/my-rides/driving`. Drivers can accept, decline, edit, and cancel before departure. Cancellation and declining a request ask for confirmation.
+
+Phase 1 stores rides in memory; reloading restores the sample data. All ride departure checks and form validation use the fixed demo `NOW` in `src/data/rides.js`. Form dates use Asia/Beirut and are stored as ISO instants. Vehicle capacity uses `viewer.passengerCapacity` when supplied, otherwise Karim/Hana have 5 passenger seats and other accounts have 4.
 
 
 ## Project structure
@@ -70,6 +77,8 @@ Then open the address Vite prints, usually http://localhost:5173.
 src/
 ├── components/   Reusable pieces: header, footer, ride card, seat counter, buttons, status pills
 ├── pages/        One file per screen: Home, Browse, Ride detail, Driver profile
+├── context/      Who is signed in (AuthProvider and useAuth)
+├── lib/          Plain logic: form validation, the fake auth API, riding statuses, ride rules
 ├── state/        App-wide state: rides and the current viewer (React context)
 ├── data/         Sample rides and users, and the seat rules
 ├── hooks/        Shared hooks, such as the loading/error state of a page
