@@ -41,5 +41,5 @@ function AppRoutes() {
 
 // A single data-router context enables the Post form's required navigation blocker.
 // Existing route elements and provider ordering are retained.
-const router = createBrowserRouter([{ path: '*', element: <AppRoutes /> }])
+const router = createBrowserRouter([{ path: '*', element: <AppRoutes /> }], { basename: import.meta.env.BASE_URL })
 export default function App() { return <RouterProvider router={router} /> }
